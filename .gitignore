@@ -1,0 +1,9 @@
+# Node modules
+/node_modules/
+
+# Data
+/dist
+
+npm-debug.log
+.sass-cache/
+*.css.map
