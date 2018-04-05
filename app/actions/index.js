@@ -1,34 +1,42 @@
 import extend from 'extend';
 import Promise from 'bluebird';
 import get from '../../common/get';
-import { noopd } from '../../common/utils';
 import session from '../lib/session';
 
 export const API_REQUEST = 'API_REQUEST';
 
+const noopd = data => data;
 const apiRequest = (response, base) => {
     return { type: API_REQUEST, response, base };
 };
 
-export const getApiRequestAction = (apis, base) => {
+export const getApiRequestAction = (apis, state, base) => {
     return (dispatch) => {
         const requests = [];
 
         Object.keys(apis).forEach(context => {
             let api = apis[context];
-            if(typeof api === 'string') {
-                api = { url: api };
+
+            if (!state.hasOwnProperty(context) || (api.forceUpdate && api._calledOnce)) {
+                if (typeof api === 'string') {
+                    api = apis[context] = { url: api };
+                }
+
+                requests.push(
+                    get(api.url, api.data)
+                    .then(response => {
+                        api._calledOnce = true;
+                        return { [context]: (api.process || noopd)(response) };
+                    })
+                );
             }
 
-            requests.push(
-                get(api.url, api.data)
-                .then(response => (
-                    { [context]: (api.process || noopd)(response) }
-                ))
-            );
+            if (api.forceUpdate && !api._calledOnce) {
+                api._calledOnce = true;
+            }
         });
 
-        if(requests.length) {
+        if (requests.length) {
             const actionCompletionPromise = (
                 Promise.all(requests)
                 .then(responses => {

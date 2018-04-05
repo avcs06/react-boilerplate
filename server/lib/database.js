@@ -11,7 +11,7 @@ const connectionPromise = new Promise((resolve, reject) => {
             keepAlive: 360000,
             connectTimeoutMS: 360000,
         });
-    
+
         const Database = mongoose.connection;
 
         Database.once('open', () => {

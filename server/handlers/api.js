@@ -1,8 +1,8 @@
-import express from 'express';
-import DAL from '../DAL';
-import HttpError from '../lib/HttpError';
+const express = require('express');
+const HttpError = require('../lib/HttpError');
+// const DAL = require('../DAL');
 
-export default () => {
+module.exports = () => {
     const app = express();
 
     app.use('/*', (req, res, next) => {

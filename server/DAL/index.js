@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import mongoose from 'mongoose';
+const fs = require('fs');
+const path = require('path');
+const mongoose = require('mongoose');
 
 const DAL = {};
 
@@ -11,4 +11,4 @@ fs.readdirSync(path.join(__dirname, './')).forEach((file) => {
     }
 });
 
-export default DAL;
+module.exports = DAL;

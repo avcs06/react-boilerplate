@@ -1,9 +1,10 @@
-import extend from 'extend';
-import Promise from 'bluebird';
-import passError from 'passerror';
-import { Schema } from 'mongoose';
-import 'mongoose-relationship';
-import connection from '../lib/database';
+require('mongoose-relationship');
+
+const extend = require('extend');
+const Promise = require('bluebird');
+const passError = require('passerror');
+const { Schema } = require('mongoose');
+const connection = require('../lib/database');
 
 const noop = Function.prototype;
 

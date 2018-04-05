@@ -1,25 +1,24 @@
-import React from 'react';
-import { Provider } from 'react-redux';
-import { StaticRouter } from 'react-router';
-import { renderToString } from 'react-dom/server';
+require('babel-register')();
 
-import routes from '../app/routes';
-import { configureStore } from '../app/store/configureStore';
+const React = require('react');
+const { renderToString } = require('react-dom/server');
+const { configureStore } = require('../app/store/configureStore');
+const App = require('./App');
 
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
-import logger from 'morgan';
-import express from 'express';
-import bodyParser from 'body-parser';
-import compression from 'compression';
+const logger = require('morgan');
+const express = require('express');
+const bodyParser = require('body-parser');
+const compression = require('compression');
 
-import apiHandlers from './handlers/api';
-const { setupDatabase } = require('./lib/database');
+const apiHandlers = require('./handlers/api');
+const sessionApis = require('../app/lib/session').default;
+const config = require('../config').default;
 
-import sessionApis from '../app/lib/session';
-
-setupDatabase('database_address');
+/* const { setupDatabase } = require('./lib/database');
+setupDatabase('database_address'); */
 
 // Initialize routing
 const app = express();
@@ -39,22 +38,15 @@ app.use((req, res) => {
     const context = {};
     const store = configureStore();
 
-    renderToString(
-        <Provider store={store}>
-            <StaticRouter location={req.url} context={context}>
-                {routes}
-            </StaticRouter>
-        </Provider>
+    const getProcessedHtml = () => (
+        renderToString(React.createElement(App, { req, store, context }))
     );
 
+    // Call once to initialize the api calls
+    getProcessedHtml();
+    // Once all the api calls are made and data is available
     sessionApis.done().then(() => {
-        const html = renderToString(
-            <Provider store={store}>
-                <StaticRouter location={req.url} context={context}>
-                    {routes}
-                </StaticRouter>
-            </Provider>
-        );
+        const html = getProcessedHtml();
 
         if (context.url) {
             res.writeHead(301, {
@@ -65,7 +57,7 @@ app.use((req, res) => {
             fs.readFile(path.join(__dirname, '../dist/index.html'), 'utf8', (err, data) => {
                 if (err) throw err;
                 let document = data.replace(/<div id="root"><\/div>/, `<div id="root">${html}</div>`);
-                document = document.replace('{{state}}', JSON.stringify(store.getState()).replace(/</g, '\\u003c'));
+                document = document.replace('{STATE_NOT_LOADED:true}', JSON.stringify(store.getState()).replace(/</g, '\\u003c'));
 
                 res.write(document);
                 res.end();
@@ -82,5 +74,5 @@ app.use((err, req, res) => {
 });
 
 // Start sever
-const port = process.env.PORT;
+const port = config.port || process.env.PORT;
 app.listen(port, () => console.log('Express server listening on port ' + port));

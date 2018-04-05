@@ -31,7 +31,7 @@ export default (...args) => {
         })
         .then(response => {
             successCallback(response);
-            return parsedResponse;
+            return response;
         })
         .catch(errorCallback)
     );

@@ -1,39 +1,62 @@
-import { Component } from 'react';
+import extend from 'extend';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { getApiRequestAction } from '../actions';
 
 class Container extends Component {
+    static propTypes = {
+        dispatch: PropTypes.func.isRequired,
+        api: PropTypes.object
+    };
+
     static getStateToPropsMap(extra) {
         const map = extra || {};
         return (state, ownProps) => {
-            const stateSection = this.base ? state.api[this.base] : state.api;
+            const stateSection = (this.base ? state.api[this.base] : state.api) || {};
 
             Object.keys(ownProps).forEach(prop => {
                 map[prop] = ownProps[prop];
             });
 
-            Object.keys(this.api || {}).forEach(prop => {
-                map[prop] = stateSection[prop];
-            });
+            if (this.api) {
+                map.api = extend({}, stateSection);
+            }
 
             return map;
         };
     }
 
-    static fetchApis(dispatch) {
-        if(this.api && Object.keys(this.api).length) {
-            dispatch(getApiRequestAction(this.api, this.base));
+    componentWillMount() {
+        const { dispatch } = this.props;
+        if (this.constructor.api) {
+            const { api: stateApi } = this.props;
+            dispatch(getApiRequestAction(this.constructor.api, stateApi, this.constructor.base));
         }
     }
 
-    componentWillMount() {
-        const { dispatch } = this.props;
-        this.constructor.fetchApis(dispatch);
+    render() {
+        const props = {};
+
+        Object.keys(this.props).forEach(key => {
+            if (key !== 'dispatch' && key !== 'api') {
+                props[key] = this.props[key];
+            }
+        });
+
+        Object.keys(this.constructor.api || {}).forEach(key => {
+            if (this.props.api.hasOwnProperty(key)) {
+                props[key] = this.props.api[key];
+            }
+        });
+
+        Object.keys(this.constructor.defaults || {}).forEach(key => {
+            if (!props.hasOwnProperty(key)) {
+                props[key] = this.constructor.defaults[key];
+            }
+        });
+
+        return React.createElement(this.constructor.component, props);
     }
 }
-
-Container.propTypes = {
-    dispatch: PropTypes.func.isRequired
-};
 
 export default Container;
