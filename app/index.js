@@ -10,7 +10,7 @@ import routes from './routes';
 import { configureStore } from './store/configureStore';
 
 const history = createHistory();
-const store = configureStore(window.__PRELOADED_STATE__, history);
+const store = configureStore(JSON.parse(window.atob(window.__PRELOADED_STATE__)), history);
 
 render(
     <Provider store={store}>

@@ -1,7 +1,6 @@
 import extend from 'extend';
 import Promise from 'bluebird';
 import get from '../../common/get';
-import session from '../lib/session';
 
 export const API_REQUEST = 'API_REQUEST';
 
@@ -10,7 +9,12 @@ const apiRequest = (response, base) => {
     return { type: API_REQUEST, response, base };
 };
 
-export const getApiRequestAction = (apis, state, base) => {
+export const getApiRequestAction = options => {
+    const apis = options.apis || [];
+    const base = options.base || null;
+    const state = options.state || {};
+    const session = options.session | null;
+
     return (dispatch) => {
         const requests = [];
 
@@ -49,7 +53,7 @@ export const getApiRequestAction = (apis, state, base) => {
                 .catch(e => {  throw e; })
             );
 
-            session.track(actionCompletionPromise);
+            session && session.track(actionCompletionPromise);
             return actionCompletionPromise;
         }
 

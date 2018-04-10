@@ -4,7 +4,7 @@ const extend = require('extend');
 const Promise = require('bluebird');
 const passError = require('passerror');
 const { Schema } = require('mongoose');
-const connection = require('../lib/database');
+const Database = require('../lib/Database');
 
 const noop = Function.prototype;
 
@@ -202,7 +202,7 @@ module.exports = (options) => {
         callback = promisifiedCallback.callback;
 
         if(data.length) {
-            connection.then(() => {
+            Database.ready(() => {
                 const bulk = this.collection.initializeUnorderedBulkOp();
                 data.forEach(record => {
                     const query = this.getQuery(record);

@@ -27,10 +27,15 @@ class Container extends Component {
     }
 
     componentWillMount() {
-        const { dispatch } = this.props;
+        const { dispatch, staticContext  } = this.props;
         if (this.constructor.api) {
             const { api: stateApi } = this.props;
-            dispatch(getApiRequestAction(this.constructor.api, stateApi, this.constructor.base));
+            dispatch(getApiRequestAction({
+                api: this.constructor.api,
+                state: stateApi,
+                base: this.constructor.base,
+                session: staticContext ? staticContext.session : null
+            }));
         }
     }
 
