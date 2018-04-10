@@ -1,6 +1,5 @@
 import React from 'react';
 import Container from '../lib/Container';
-import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import Header from '../components/Header';
@@ -20,4 +19,4 @@ class App extends Container {
     }
 }
 
-export default connect(App.getStateToPropsMap())(App);
+export default App.container;

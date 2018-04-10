@@ -1,12 +1,21 @@
 import extend from 'extend';
 import PropTypes from 'prop-types';
+
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
+
 import { getApiRequestAction } from '../actions';
+
+const ignore = ['dispatch', 'api', 'match', 'history', 'location', 'staticContext'];
 
 class Container extends Component {
     static propTypes = {
         dispatch: PropTypes.func.isRequired,
-        api: PropTypes.object
+        api: PropTypes.object,
+        match: PropTypes.object.isRequired,
+        location: PropTypes.object.isRequired,
+        history: PropTypes.object.isRequired
     };
 
     static getStateToPropsMap(extra) {
@@ -26,19 +35,31 @@ class Container extends Component {
         };
     }
 
-    componentWillMount() {
-        const { dispatch } = this.props;
-        if (this.constructor.api) {
-            const { api: stateApi } = this.props;
-            dispatch(getApiRequestAction(this.constructor.api, stateApi, this.constructor.base));
+    static fetchApis(state, dispatch, context) {
+        if (this.api) {
+            dispatch(getApiRequestAction({
+                state,
+                api: this.api,
+                base: this.base,
+                session: context ? context.session : null
+            }));
         }
+    }
+
+    static get container() {
+        return withRouter(connect(this.getStateToPropsMap())(this));
+    }
+
+    componentWillMount() {
+        const { dispatch, staticContext, api } = this.props;
+        this.constructor.fetchApis(api, dispatch, staticContext);
     }
 
     render() {
         const props = {};
 
         Object.keys(this.props).forEach(key => {
-            if (key !== 'dispatch' && key !== 'api') {
+            if (!ignore.includes(key)) {
                 props[key] = this.props[key];
             }
         });

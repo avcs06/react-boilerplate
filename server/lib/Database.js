@@ -15,7 +15,7 @@ const connectionPromise = new Promise((resolve, reject) => {
         const Database = mongoose.connection;
 
         Database.once('open', () => {
-            resolve();
+            resolve(Database);
         });
         Database.on('error', err => {
             console.error('connection error:', err);
@@ -23,6 +23,8 @@ const connectionPromise = new Promise((resolve, reject) => {
         });
     };
 });
+
+connectionPromise.ready = connectionPromise.then;
 
 module.exports = connectionPromise;
 module.exports.setupDatabase = setupDatabase;

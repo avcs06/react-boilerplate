@@ -1,5 +1,3 @@
-import { connect } from 'react-redux';
-
 import Container from '../lib/Container';
 import Home from '../components/Home';
 
@@ -15,10 +13,7 @@ class HomeContainer extends Container {
             data: {
                 something: true
             },
-            process: data => {
-                console.log(data);
-                return data;
-            },
+            process: d => d,
             forceUpdate: true
         }
     };
@@ -29,4 +24,4 @@ class HomeContainer extends Container {
     };
 }
 
-export default connect(HomeContainer.getStateToPropsMap())(HomeContainer);
+export default HomeContainer.container;
