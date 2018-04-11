@@ -1,11 +1,20 @@
-import React, { Component } from 'react';
+import React from 'react';
+import Component from '../lib/Component';
 
 class PageNotFound extends Component {
     componentWillMount() {
+        super.componentWillMount();
         const { staticContext } = this.props;
         if (staticContext) {
             staticContext.code = 404;
         }
+    }
+
+    getMetaData() {
+        return {
+            'title': 'Page Not Found',
+            'meta:description': 'Page Not Found'
+        };
     }
 
     render() {
@@ -15,4 +24,4 @@ class PageNotFound extends Component {
     }
 }
 
-export default PageNotFound;
+export default PageNotFound.getComponent();

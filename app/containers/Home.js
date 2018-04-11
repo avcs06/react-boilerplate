@@ -22,6 +22,18 @@ class HomeContainer extends Container {
         sampleApi1: '',
         sampleApi2: {}
     };
+
+    getMetaData() {
+        const metaData = {};
+        if (this.props) {
+            metaData.title = 'Your Site Title for this Page';
+            metaData['meta:description'] = 'Sample Description for this Page';
+            metaData['meta:og:description'] = 'Sample Description for Facebook';
+            metaData['link:canonical'] = '/home';
+        }
+
+        return metaData;
+    }
 }
 
-export default HomeContainer.container;
+export default HomeContainer.getContainer();

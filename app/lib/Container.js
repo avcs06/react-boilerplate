@@ -1,13 +1,21 @@
 import extend from 'extend';
 import PropTypes from 'prop-types';
 
-import React, { Component } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
+import Component from './Component';
 import { getApiRequestAction } from '../actions';
 
-const ignore = ['dispatch', 'api', 'match', 'history', 'location', 'staticContext'];
+const ignore = [
+    'api',
+    'dispatch',
+    'match',
+    'history',
+    'location',
+    'staticContext'
+];
 
 class Container extends Component {
     static propTypes = {
@@ -46,11 +54,13 @@ class Container extends Component {
         }
     }
 
-    static get container() {
-        return withRouter(connect(this.getStateToPropsMap())(this));
+    static getContainer() {
+        const Container = connect(this.getStateToPropsMap())(this);
+        return this.api ? withRouter(Container) : Container;
     }
 
     componentWillMount() {
+        super.componentWillMount();
         const { dispatch, staticContext, api } = this.props;
         this.constructor.fetchApis(api, dispatch, staticContext);
     }

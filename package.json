@@ -27,6 +27,7 @@
     "express": "^4.16.3",
     "ignore-styles": "^5.0.1",
     "isomorphic-fetch": "^2.2.1",
+    "jquery": "^3.3.1",
     "mongoose": "^4.11.0",
     "mongoose-relationship": "^0.1.5",
     "morgan": "^1.8.2",

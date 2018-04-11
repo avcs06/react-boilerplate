@@ -19,4 +19,4 @@ class App extends Container {
     }
 }
 
-export default App.container;
+export default App.getContainer();

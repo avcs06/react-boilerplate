@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import React from 'react';
+import extend from 'extend';
+import { withRouter } from 'react-router';
 
 const metaInfo = {
     title: {
@@ -15,7 +17,25 @@ const metaInfo = {
     }
 };
 
+const updateDocumentMetaTags = metaData => {
+    Object.keys(metaData).forEach(key => {
+        const [tag, ...names] = key.split(':');
+        const name = names.join(':') || 'title';
+        const info = metaInfo[tag];
+
+        let $element = $(`${tag}[${info.name}="${name}"]`);
+        if (!$element.length) {
+            $element = $(`<${tag} ${info.name}="${name}" />`);
+            $('head').append($element);
+        }
+        (info.content && $element.attr(info.content, metaData[key])) || $element.html(metaData[key]);
+    });
+};
+
 class Component extends React.Component {
+    static getComponent() {
+        return this.prototype.hasOwnProperty('getMetaData') ? withRouter(this) : this;
+    }
 
     componentWillMount() {
         this.generateMetaTags(this.getMetaData());
@@ -26,17 +46,11 @@ class Component extends React.Component {
     }
 
     generateMetaTags(metaData) {
-        Object.keys(metaData).forEach(key => {
-            const [tag, name = 'title'] = key.split(':');
-            const info = metaInfo[tag];
-
-            let $element = $(`${tag}[${info.name}=${name}]`);
-            if (!$element.length) {
-                $element = $(`<${tag} ${info.name}="${name}" />`);
-                $('head').append($element);
-            }
-            (info.content && $element.attr(info.content, metaData[key])) || $element.html(metaData[key]);
-        });
+        if (this.props.staticContext) {
+            extend(this.props.staticContext.meta, metaData);
+        } else {
+            updateDocumentMetaTags(metaData);
+        }
     }
 }
 

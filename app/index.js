@@ -9,12 +9,14 @@ import './styles/main.scss';
 import routes from './routes';
 import { configureStore } from './store/configureStore';
 
-if(!window.__PRELOADED_STATE__.STATE_NOT_LOADED) {
-    window.__PRELOADED_STATE__ = JSON.parse(window.atob(window.__PRELOADED_STATE__));
+let preloadedState = {};
+if (!window.__PRELOADED_STATE__.STATE_NOT_LOADED) {
+    preloadedState = JSON.parse(window.atob(window.__PRELOADED_STATE__));
 }
+delete window.__PRELOADED_STATE__;
 
 const history = createHistory();
-const store = configureStore(window.__PRELOADED_STATE__, history);
+const store = configureStore(preloadedState, history);
 
 hydrate(
     <Provider store={store}>

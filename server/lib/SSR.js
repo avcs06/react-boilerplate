@@ -8,9 +8,34 @@ const { configureStore } = require('../../app/store/configureStore');
 const Session = require('./Session');
 const App = require('../App');
 
+const metaInfo = {
+    title: {
+        name: 'id'
+    },
+    link: {
+        name: 'rel',
+        content: 'href'
+    },
+    meta: {
+        name: 'name',
+        content: 'content'
+    }
+};
+
+const generateMetaTags = metaData => (
+    Object.keys(metaData).map(key => {
+        const [tag, ...names] = key.split(':');
+        const name = names.join(':') || 'title';
+        const info = metaInfo[tag];
+        return (
+            `<${tag} ${info.name}="${name}" ${(info.content && `${info.content}="${metaData[key]}" />`) || `>${metaData[key]}</${tag}>`}`
+        );
+    }).join('')
+);
+
 module.exports = (req, res) => {
     const session = new Session();
-    const context = { session, meta: [] };
+    const context = { session, meta: {} };
     const store = configureStore();
 
     const getProcessedHtml = (context) => (
@@ -34,7 +59,7 @@ module.exports = (req, res) => {
         // Once all the api calls are made and data is available
         session.done(() => {
             const html = getProcessedHtml({});
-            const metaTags = context.meta.map(e => renderToStaticMarkup(e)).join('');
+            const metaTags = generateMetaTags(context.meta);
 
             fs.readFile(path.join(__dirname, '../../dist/index.html'), 'utf8', (err, data) => {
                 if (err) {
