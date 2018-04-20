@@ -1,6 +1,7 @@
 require('ignore-styles');
 require('babel-register')({
-    ignore: [/(node_modules)/]
+    ignore: [/(node_modules)/],
+    plugins: ['dynamic-import-node']
 });
 
 const path = require('path');
@@ -8,6 +9,7 @@ const logger = require('morgan');
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const Loadable = require('react-loadable');
 
 const SSR = require('./lib/SSR');
 const apiHandlers = require('./handlers/api');
@@ -44,5 +46,7 @@ app.use((err, req, res) => {
 });
 
 // Start sever
-const port = config.port || process.env.PORT;
-app.listen(port, () => console.log('Express server listening on port ' + port));
+Loadable.preloadAll().then(() => {
+    const port = config.port || process.env.PORT;
+    app.listen(port, () => console.log('Express server listening on port ' + port));
+});

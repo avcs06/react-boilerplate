@@ -1,9 +1,10 @@
 import React from 'react';
 import Container from '../lib/Container';
 import { Route, Switch } from 'react-router-dom';
+import getComponent from '../lib/getComponent';
 
-import Header from '../components/Header';
-import Content from '../components/Content';
+const Header = getComponent('components/Header');
+const Content = getComponent('components/Content');
 
 class App extends Container {
     render() {

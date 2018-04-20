@@ -28,10 +28,10 @@ export const getApiRequestAction = options => {
 
                 requests.push(
                     get(api.url, api.data)
-                    .then(response => {
-                        api._calledOnce = true;
-                        return { [context]: (api.process || noopd)(response) };
-                    })
+                        .then(response => {
+                            api._calledOnce = true;
+                            return { [context]: (api.process || noopd)(response) };
+                        })
                 );
             }
 
@@ -43,14 +43,14 @@ export const getApiRequestAction = options => {
         if (requests.length) {
             const actionCompletionPromise = (
                 Promise.all(requests)
-                .then(responses => {
-                    const response = {};
-                    responses.forEach(result => {
-                        extend(response, result);
-                    });
-                    dispatch(apiRequest(response, base));
-                })
-                .catch(e => {  throw e; })
+                    .then(responses => {
+                        const response = {};
+                        responses.forEach(result => {
+                            extend(response, result);
+                        });
+                        dispatch(apiRequest(response, base));
+                    })
+                    .catch(e => { throw e; })
             );
 
             session && session.track(actionCompletionPromise);

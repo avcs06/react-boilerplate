@@ -9,7 +9,7 @@ var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 var env = process.env.NODE_ENV || 'development';
 var htmlWebpackPlugin = new HtmlWebpackPlugin({
-    template: path.join(__dirname, 'app/index.tpl.html'),
+    template: path.join(__dirname, 'app/index.html'),
     inject: 'body',
     filename: '../index.html'
 });
@@ -66,15 +66,21 @@ var commonConfig = {
             }, {
                 test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
                 loader: "file-loader"
+            }, {
+                test: /\.js?$/,
+                exclude: /node_modules/,
+                loader: path.resolve('./loader.js')
             }
         ]
     }
 };
 
 var developmentConfig = extend(true, {}, commonConfig, {
+    mode: 'development',
     devtool: 'eval-source-map',
     output: {
         filename: '[name].js',
+        chunkFilename: '[name].js'
     },
     plugins: [
         htmlWebpackPlugin,
@@ -88,19 +94,16 @@ var developmentConfig = extend(true, {}, commonConfig, {
 });
 
 var productionConfig = extend(true, {}, commonConfig, {
+    mode: 'production',
+    bail: true,
     output: {
-        filename: 'app-[hash].min.js',
-        chunkFilename: 'app-[chunkhash].min.js'
+        filename: '[name]-[hash:8].min.js',
+        chunkFilename: '[name]-[chunkhash:8].min.js'
     },
     plugins: [
         htmlWebpackPlugin,
         new ExtractTextPlugin('[name]-[hash].min.css'),
-        new UglifyJsPlugin({
-            compressor: {
-                warnings: false,
-                screw_ie8: true
-            }
-        }),
+        new UglifyJsPlugin(),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify('production')
         }),

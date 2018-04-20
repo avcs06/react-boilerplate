@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import PageNotFound from './PageNotFound';
-import Home from '../containers/Home';
+import getComponent from '../lib/getComponent';
 
-const Views = {
-    home: Home
-};
+const Home = getComponent('containers/Home');
+const Views = { home: Home };
 
 class Content extends Component {
     render() {

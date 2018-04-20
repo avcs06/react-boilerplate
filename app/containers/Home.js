@@ -1,5 +1,7 @@
 import Container from '../lib/Container';
-import Home from '../components/Home';
+import getComponent from '../lib/getComponent';
+
+const Home = getComponent('components/Home');
 
 class HomeContainer extends Container {
     // You can get the api data from state.api.home now
