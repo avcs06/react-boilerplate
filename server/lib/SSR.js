@@ -9,6 +9,8 @@ const { configureStore } = require('../../app/store/configureStore');
 const Session = require('./Session');
 const App = require('../App');
 
+const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../../dist/assets/manifest.json'), 'utf8'));
+
 const metaInfo = {
     title: {
         name: 'id'
@@ -32,6 +34,20 @@ const generateMetaTags = metaData => (
             `<${tag} ${info.name}="${name}" ${(info.content && `${info.content}="${metaData[key]}" />`) || `>${metaData[key]}</${tag}>`}`
         );
     }).join('')
+);
+
+const getScripts = modules => (
+    Object.keys(manifest)
+        .filter(asset => modules.indexOf(asset.replace('.js', '')) > -1)
+        .map(k => `<script type="text/javascript" src="${manifest[k]}"></script>`)
+        .join('')
+);
+
+const getStyles = modules => (
+    Object.keys(manifest)
+        .filter(asset => modules.indexOf(asset.replace('.css', '')) > -1)
+        .map(k => `<link href="${manifest[k]}" rel="stylesheet" />`)
+        .join('')
 );
 
 module.exports = (req, res) => {
@@ -62,7 +78,6 @@ module.exports = (req, res) => {
                 </Loadable.Capture>
             );
 
-            console.log(context.modules);
             fs.readFile(path.join(__dirname, '../../dist/index.html'), 'utf8', (err, data) => {
                 if (err) {
                     throw err;
@@ -72,6 +87,8 @@ module.exports = (req, res) => {
                     data
                         .replace('<!--META-TAGS-->', metaTags)
                         .replace('<div id="root"></div>', `<div id="root">${html}</div>`)
+                        .replace('</head>', getStyles(context.modules) + '</head>')
+                        .replace('</body>', getScripts(context.modules) + '</body>')
                         .replace('{STATE_NOT_LOADED:true}', JSON.stringify(
                             new Buffer(JSON.stringify(store.getState())).toString('base64')
                         ))

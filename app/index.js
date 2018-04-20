@@ -1,6 +1,8 @@
 import 'babel-polyfill';
 import React from 'react';
+import Loadable from 'react-loadable';
 import createHistory from 'history/createBrowserHistory';
+
 import { hydrate } from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router';
@@ -18,11 +20,15 @@ delete window.__PRELOADED_STATE__;
 const history = createHistory();
 const store = configureStore(preloadedState, history);
 
-hydrate(
-    <Provider store={store}>
-        <Router history={history}>
-            {routes}
-        </Router>
-    </Provider>,
-    document.getElementById('root')
-);
+window.onload = () => {
+    Loadable.preloadReady().then(() => {
+        hydrate(
+            <Provider store={store}>
+                <Router history={history}>
+                    {routes}
+                </Router>
+            </Provider>,
+            document.getElementById('root')
+        );
+    });
+};

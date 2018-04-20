@@ -1,3 +1,4 @@
+import '../styles/home.scss';
 import Container from '../lib/Container';
 import Home from '../components/Home';
 

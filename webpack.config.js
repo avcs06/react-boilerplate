@@ -3,9 +3,10 @@
 const path = require('path');
 const extend = require('extend');
 const webpack = require('webpack');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const commonConfig = {
     target: 'web',
@@ -63,14 +64,16 @@ const commonConfig = {
     }
 };
 
-const env = process.env.NODE_ENV || 'development';
 const htmlWebpackPlugin = new HtmlWebpackPlugin({
     template: path.join(__dirname, 'app/index.html'),
     inject: 'body',
     filename: '../index.html'
 });
+const manifestPlugin = new ManifestPlugin({
+    fileName: 'manifest.json',
+});
 
-const developmentConfig = extend(true, {}, commonConfig, {
+const developmentConfig = () => extend(true, {}, commonConfig, {
     mode: 'development',
     devtool: 'eval-source-map',
     output: {
@@ -79,6 +82,7 @@ const developmentConfig = extend(true, {}, commonConfig, {
     },
     plugins: [
         htmlWebpackPlugin,
+        manifestPlugin,
         new MiniCssExtractPlugin({
             filename: 'css/[name].css',
             chunkFilename: 'css/[name].css',
@@ -91,7 +95,7 @@ const developmentConfig = extend(true, {}, commonConfig, {
     ]
 });
 
-const productionConfig = extend(true, {}, commonConfig, {
+const productionConfig = () => extend(true, {}, commonConfig, {
     mode: 'production',
     bail: true,
     output: {
@@ -100,6 +104,7 @@ const productionConfig = extend(true, {}, commonConfig, {
     },
     plugins: [
         htmlWebpackPlugin,
+        manifestPlugin,
         new MiniCssExtractPlugin({
             filename: 'css/[name]-[hash:8].min.css',
             chunkFilename: 'css/[name]-[chunkhash:8].min.css',
@@ -114,4 +119,5 @@ const productionConfig = extend(true, {}, commonConfig, {
     ]
 });
 
-module.exports = env == 'development' ? developmentConfig : productionConfig;
+const env = process.env.NODE_ENV || 'development';
+module.exports = env == 'development' ? developmentConfig() : productionConfig();
