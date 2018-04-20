@@ -3,7 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const React = require('react');
-const { renderToString, renderToStaticMarkup } = require('react-dom/server');
+const Loadable = require('react-loadable');
+const { renderToString } = require('react-dom/server');
 const { configureStore } = require('../../app/store/configureStore');
 const Session = require('./Session');
 const App = require('../App');
@@ -35,15 +36,11 @@ const generateMetaTags = metaData => (
 
 module.exports = (req, res) => {
     const session = new Session();
-    const context = { session, meta: {} };
+    const context = { session, meta: {}, modules: [] };
     const store = configureStore();
 
-    const getProcessedHtml = (context) => (
-        renderToString(React.createElement(App, { req, store, context }))
-    );
-
     // Call once to initialize the api calls
-    getProcessedHtml(context);
+    renderToString(<App req={req} store={store} context={context} />);
 
     // If there is any redirect
     if (context.url) {
@@ -58,9 +55,14 @@ module.exports = (req, res) => {
 
         // Once all the api calls are made and data is available
         session.done(() => {
-            const html = getProcessedHtml({});
             const metaTags = generateMetaTags(context.meta);
+            const html = renderToString(
+                <Loadable.Capture report={m => context.modules.push(m)}>
+                    <App req={req} store={store} context={context} />
+                </Loadable.Capture>
+            );
 
+            console.log(context.modules);
             fs.readFile(path.join(__dirname, '../../dist/index.html'), 'utf8', (err, data) => {
                 if (err) {
                     throw err;
@@ -68,11 +70,11 @@ module.exports = (req, res) => {
 
                 res.write(
                     data
-                    .replace('<!--META-TAGS-->', metaTags)
-                    .replace('<div id="root"></div>', `<div id="root">${html}</div>`)
-                    .replace('{STATE_NOT_LOADED:true}', JSON.stringify(
-                        new Buffer(JSON.stringify(store.getState())).toString('base64')
-                    ))
+                        .replace('<!--META-TAGS-->', metaTags)
+                        .replace('<div id="root"></div>', `<div id="root">${html}</div>`)
+                        .replace('{STATE_NOT_LOADED:true}', JSON.stringify(
+                            new Buffer(JSON.stringify(store.getState())).toString('base64')
+                        ))
                 );
                 res.end();
             });

@@ -1,20 +1,13 @@
 'use strict';
 
-var path = require('path');
-var extend = require('extend');
-var webpack = require('webpack');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const path = require('path');
+const extend = require('extend');
+const webpack = require('webpack');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-var env = process.env.NODE_ENV || 'development';
-var htmlWebpackPlugin = new HtmlWebpackPlugin({
-    template: path.join(__dirname, 'app/index.html'),
-    inject: 'body',
-    filename: '../index.html'
-});
-
-var commonConfig = {
+const commonConfig = {
     target: 'web',
     entry: {
         app: path.join(__dirname, 'app/index.js')
@@ -33,22 +26,21 @@ var commonConfig = {
             }, {
                 test: /\.js?$/,
                 exclude: /node_modules/,
-                loader: 'babel-loader'
+                use: [
+                    'babel-loader',
+                    path.resolve('./loader.js')
+                ]
             }, {
                 test: /\.scss$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: [{
-                        loader: "css-loader"
-                    }, {
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    "css-loader",{
                         loader: "postcss-loader",
                         options: {
                             fn: () => require('autoprefixer')
                         }
-                    }, {
-                        loader: "sass-loader"
-                    }]
-                })
+                    }, "sass-loader"
+                ]
             }, {
                 test: /\.png$/,
                 loader: "url-loader",
@@ -66,25 +58,31 @@ var commonConfig = {
             }, {
                 test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
                 loader: "file-loader"
-            }, {
-                test: /\.js?$/,
-                exclude: /node_modules/,
-                loader: path.resolve('./loader.js')
             }
         ]
     }
 };
 
-var developmentConfig = extend(true, {}, commonConfig, {
+const env = process.env.NODE_ENV || 'development';
+const htmlWebpackPlugin = new HtmlWebpackPlugin({
+    template: path.join(__dirname, 'app/index.html'),
+    inject: 'body',
+    filename: '../index.html'
+});
+
+const developmentConfig = extend(true, {}, commonConfig, {
     mode: 'development',
     devtool: 'eval-source-map',
     output: {
-        filename: '[name].js',
-        chunkFilename: '[name].js'
+        filename: 'js/[name].js',
+        chunkFilename: 'js/[name].js'
     },
     plugins: [
         htmlWebpackPlugin,
-        new ExtractTextPlugin('[name].css'),
+        new MiniCssExtractPlugin({
+            filename: 'css/[name].css',
+            chunkFilename: 'css/[name].css',
+        }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.DefinePlugin({
@@ -93,16 +91,19 @@ var developmentConfig = extend(true, {}, commonConfig, {
     ]
 });
 
-var productionConfig = extend(true, {}, commonConfig, {
+const productionConfig = extend(true, {}, commonConfig, {
     mode: 'production',
     bail: true,
     output: {
-        filename: '[name]-[hash:8].min.js',
-        chunkFilename: '[name]-[chunkhash:8].min.js'
+        filename: 'js/[name]-[hash:8].min.js',
+        chunkFilename: 'js/[name]-[chunkhash:8].min.js'
     },
     plugins: [
         htmlWebpackPlugin,
-        new ExtractTextPlugin('[name]-[hash].min.css'),
+        new MiniCssExtractPlugin({
+            filename: 'css/[name]-[hash:8].min.css',
+            chunkFilename: 'css/[name]-[chunkhash:8].min.css',
+        }),
         new UglifyJsPlugin(),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify('production')

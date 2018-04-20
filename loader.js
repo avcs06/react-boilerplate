@@ -14,7 +14,7 @@ module.exports = function(content) {
                 const name = args[1].split('/').join('-').toLowerCase();
                 return `(
     Loadable({
-        loader: () => import(/* webpackChunkName: "${name}" */ '${path.relative(directory, path.resolve(`./app/${args[1]}`))}'),
+        loader: () => import(/* webpackChunkName: "${name}" */ './${path.relative(directory, path.resolve(`./app/${args[1]}`))}'),
         loading: () => <Loader />,
         modules: ['${name}']
     })

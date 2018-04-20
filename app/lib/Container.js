@@ -55,8 +55,8 @@ class Container extends Component {
     }
 
     static getContainer() {
-        const Container = connect(this.getStateToPropsMap())(this);
-        return this.api ? withRouter(Container) : Container;
+        const container = connect(this.getStateToPropsMap())(this);
+        return this.api ? withRouter(container) : container;
     }
 
     componentWillMount() {
