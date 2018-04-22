@@ -33,8 +33,12 @@ const updateDocumentMetaTags = metaData => {
 };
 
 class Component extends React.Component {
+    static _shouldGetComponentWithRouter() {
+        return !!this.prototype.hasOwnProperty('getMetaData');
+    }
+
     static getComponent() {
-        return this.prototype.hasOwnProperty('getMetaData') ? withRouter(this) : this;
+        return this._shouldGetComponentWithRouter() ? withRouter(this) : this;
     }
 
     componentWillMount() {
