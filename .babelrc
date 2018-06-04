@@ -6,7 +6,7 @@
     ],
     "plugins": [
         "transform-class-properties",
-        "syntax-dynamic-import",
+        "./reactLoadableWebpack",
         "react-loadable/babel"
     ]
 }

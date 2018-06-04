@@ -21,7 +21,7 @@ const history = createHistory();
 const store = configureStore(preloadedState, history);
 
 window.onload = () => {
-    Loadable.preloadReady().then(() => {
+    Loadable.preloadReady().then(() => (
         hydrate(
             <Provider store={store}>
                 <Router history={history}>
@@ -29,6 +29,6 @@ window.onload = () => {
                 </Router>
             </Provider>,
             document.getElementById('root')
-        );
-    });
+        )
+    ));
 };
