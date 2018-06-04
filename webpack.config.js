@@ -1,12 +1,15 @@
 'use strict';
 
 const path = require('path');
+const glob = require('glob-all');
 const extend = require('extend');
 const webpack = require('webpack');
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const PurifyCSSPlugin = require('purifycss-webpack');
+const { ReactLoadablePlugin } = require('react-loadable/webpack');
 
 const commonConfig = {
     target: 'web',
@@ -14,7 +17,7 @@ const commonConfig = {
         app: path.join(__dirname, 'app/index.js')
     },
     output: {
-        path: path.join(__dirname, '/dist/assets'),
+        path: path.join(__dirname, '/dist/assets/'),
         publicPath: '/static/'
     },
     module: {
@@ -28,14 +31,13 @@ const commonConfig = {
                 test: /\.js?$/,
                 exclude: /node_modules/,
                 use: [
-                    'babel-loader',
-                    path.resolve('./loader.js')
+                    'babel-loader'
                 ]
             }, {
-                test: /\.scss$/,
+                test: /\.s?css$/,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    "css-loader",{
+                    "css-loader", {
                         loader: "postcss-loader",
                         options: {
                             fn: () => require('autoprefixer')
@@ -65,12 +67,12 @@ const commonConfig = {
 };
 
 const htmlWebpackPlugin = new HtmlWebpackPlugin({
-    template: path.join(__dirname, 'app/index.html'),
-    inject: 'body',
-    filename: '../index.html'
+    filename: '../index.html',
+    template: path.join(__dirname, 'app/index.html')
 });
-const manifestPlugin = new ManifestPlugin({
-    fileName: 'manifest.json',
+
+const reactLoadablePlugin = new ReactLoadablePlugin({
+    filename: './dist/assets/react-loadable.json',
 });
 
 const developmentConfig = () => extend(true, {}, commonConfig, {
@@ -82,10 +84,16 @@ const developmentConfig = () => extend(true, {}, commonConfig, {
     },
     plugins: [
         htmlWebpackPlugin,
-        manifestPlugin,
+        reactLoadablePlugin,
         new MiniCssExtractPlugin({
             filename: 'css/[name].css',
             chunkFilename: 'css/[name].css',
+        }),
+        new PurifyCSSPlugin({
+            paths: glob.sync([
+                path.join(__dirname, './app/*.html'),
+                path.join(__dirname, './app/**/*.js')
+            ])
         }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
@@ -104,10 +112,17 @@ const productionConfig = () => extend(true, {}, commonConfig, {
     },
     plugins: [
         htmlWebpackPlugin,
-        manifestPlugin,
+        reactLoadablePlugin,
         new MiniCssExtractPlugin({
             filename: 'css/[name]-[hash:8].min.css',
             chunkFilename: 'css/[name]-[chunkhash:8].min.css',
+        }),
+        new PurifyCSSPlugin({
+            paths: glob.sync([
+                path.join(__dirname, './app/*.html'),
+                path.join(__dirname, './app/**/*.js')
+            ]),
+            minimize: true
         }),
         new UglifyJsPlugin(),
         new webpack.DefinePlugin({

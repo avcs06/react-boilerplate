@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import React from 'react';
 import extend from 'extend';
 import { withRouter } from 'react-router';
@@ -23,12 +22,13 @@ const updateDocumentMetaTags = metaData => {
         const name = names.join(':') || 'title';
         const info = metaInfo[tag];
 
-        let $element = $(`${tag}[${info.name}="${name}"]`);
-        if (!$element.length) {
-            $element = $(`<${tag} ${info.name}="${name}" />`);
-            $('head').append($element);
+        let element = document.querySelector(`${tag}[${info.name}="${name}"]`);
+        if (!element) {
+            element = document.createElement(tag);
+            element[info.name] = name;
+            document.getElementsByTagName('head')[0].appendChild(element);
         }
-        (info.content && $element.attr(info.content, metaData[key])) || $element.html(metaData[key]);
+        (info.content && (element[info.content] = metaData[key])) || (element.innerHTML = metaData[key]);
     });
 };
 

@@ -1,20 +1,15 @@
 import React, { Component } from 'react';
-import getComponent from '../lib/getComponent';
+import getLoadableComponent from '../lib/getLoadableComponent';
 
-const Home = getComponent('containers/Home');
-const PageNotFound = getComponent('components/PageNotFound');
-const Views = { home: Home };
+const views = {
+    home: getLoadableComponent(import('./Home')),
+    pageNotFound: getLoadableComponent(import('./PageNotFound'))
+};
 
 class Content extends Component {
     render() {
-        const { match: { params: { route }}} = this.props;
-
-        // Empty or null route => Home page
-        // Do some routing here and get the View for current route
-        let View = !route ? Home : Views[route];
-        if (!View) {
-            View = PageNotFound;
-        }
+        const route = this.props.match.params.route || 'home';
+        const View = views[route] || views.pageNotFound;
 
         return <View />;
     }

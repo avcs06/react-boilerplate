@@ -8,3 +8,6 @@ export function configureStore(initialState = {}, history) {
     history && middlewares.push(routerMiddleware(history));
     return createStore(rootReducer, initialState, applyMiddleware(...middlewares));
 }
+
+// I believe store should always be accessed from react-redux connect, if you want to access it externally
+// You can create a variable, assign the output of createStore to the variable inside configureStore and export it.

@@ -1,6 +1,5 @@
 require('ignore-styles');
 require('babel-register')({
-    ignore: [/(node_modules)/],
     plugins: ['dynamic-import-node']
 });
 
@@ -12,28 +11,29 @@ const compression = require('compression');
 const Loadable = require('react-loadable');
 
 const SSR = require('./lib/SSR');
-const apiHandlers = require('./handlers/api');
+const config = require('../config');
 
-const config = require('../config').default;
-
-/* const { setupDatabase } = require('./lib/Database');
-setupDatabase('database_address'); */
+/*
+    const apiHandlers = require('./handlers/api');
+    const { setupDatabase } = require('./lib/Database');
+    setupDatabase(config.database);
+*/
 
 // Initialize routing
 const app = express();
 app.use(compression());
-app.use(logger('dev'));
+app.use(logger('tiny'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Handle static files
 app.use('/static', express.static(
     path.join(__dirname, '../dist/assets'),
-    { maxAge: '30d' }
+    { immutable: true, maxAge: '1y' }
 ));
 
 // Handle API requests
-app.use('/api', apiHandlers());
+// app.use('/api', apiHandlers());
 
 // Handle Pages
 app.use(SSR);
