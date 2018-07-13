@@ -1,11 +1,11 @@
 {
-  "name": "react-bp",
+  "name": "react-boilerplate",
   "version": "1.0.0-beta",
   "description": "A high performance react boilerplate",
   "author": "AvcS",
   "license": "UNLICENSED",
   "main": "server/index.js",
-  "repository": "git@github.com:avcs06/react-bp.git",
+  "repository": "git@github.com:avcs06/react-boilerplate.git",
   "scripts": {
     "clean": "rimraf dist && mkdirp dist/assets && cp -r assets/* dist/assets/",
     "server": "NODE_ENV=development nodemon server/index.js --watch",
