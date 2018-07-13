@@ -1,6 +1,7 @@
 require('ignore-styles');
+require('module-alias/register');
 require('babel-register')({
-    plugins: ['dynamic-import-node']
+    plugins: ['#root/.babel/dynamicImportNode']
 });
 
 const path = require('path');
@@ -11,13 +12,11 @@ const compression = require('compression');
 const Loadable = require('react-loadable');
 
 const SSR = require('./lib/SSR');
-const config = require('../config');
+const apiHandlers = require('./handlers/api');
 
-/*
-    const apiHandlers = require('./handlers/api');
-    const { setupDatabase } = require('./lib/Database');
-    setupDatabase(config.database);
-*/
+const config = require('#config');
+const { setPort } = require('#common/get');
+setPort(config.port);
 
 // Initialize routing
 const app = express();
@@ -33,7 +32,7 @@ app.use('/static', express.static(
 ));
 
 // Handle API requests
-// app.use('/api', apiHandlers());
+app.use('/api', apiHandlers());
 
 // Handle Pages
 app.use(SSR);
@@ -42,11 +41,10 @@ app.use(SSR);
 app.use((err, req, res) => {
     console.log(err.stack ? err.stack : err);
     res.status(err.status || 500);
-    res.send({ message: err.message });
+    res.send({ message: err.message || err });
 });
 
 // Start sever
 Loadable.preloadAll().then(() => {
-    const port = config.port || process.env.PORT;
-    app.listen(port, () => console.log('Express server listening on port ' + port));
+    app.listen(config.port, () => console.log('Express server listening on port ' + config.port));
 });

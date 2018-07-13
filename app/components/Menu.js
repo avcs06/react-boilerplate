@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { NavLink } from 'react-router-dom';
+import NavLink from 'react-router-dom/NavLink';
 
+// This example is just to show the usage of NavLink and activeClassName
 const Menu = ({tabs}) => (
     <ul>
         {Array.from(tabs.map(tab => (

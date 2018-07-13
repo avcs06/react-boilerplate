@@ -1,4 +1,4 @@
-import '../styles/loader.scss';
+import '$styles/loader.scss';
 import React from 'react';
 
 const Loader = () => (

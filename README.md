@@ -1,1 +1,0 @@
-[DEMO](https://avcs.pro)

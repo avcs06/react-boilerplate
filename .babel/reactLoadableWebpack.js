@@ -1,12 +1,9 @@
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-const _babelPluginSyntaxDynamicImport = require('babel-plugin-syntax-dynamic-import');
-const _babelPluginSyntaxDynamicImport2 = _interopRequireDefault(_babelPluginSyntaxDynamicImport);
+module.exports.__esModule = true;
+const syntax = require('babel-plugin-syntax-dynamic-import');
 
-module.exports.default = function(_ref) {
-    const t = _ref.types;
-
+module.exports.default = function({ types: t }) {
     return {
-        inherits: _babelPluginSyntaxDynamicImport2.default,
+        inherits: syntax,
         visitor: {
             ImportDeclaration: function ImportDeclaration(path) {
                 const source = path.node.source.value;
@@ -20,25 +17,35 @@ module.exports.default = function(_ref) {
                 const binding = path.scope.getBinding(bindingName);
 
                 binding.referencePaths.forEach(refPath => {
-                    let callExpression = refPath.parentPath;
-
-                    if (callExpression.isMemberExpression() && callExpression.node.computed === false && callExpression.get('property').isIdentifier({ name: 'Map' })) {
-                        callExpression = callExpression.parentPath;
-                    }
-
+                    const callExpression = refPath.parentPath;
                     if (!callExpression.isCallExpression()) return;
 
                     const args = callExpression.get('arguments');
                     if (args.length !== 1) throw callExpression.error;
 
                     const loader = args[0];
-                    const importPath = loader.node.arguments[0];
+                    const importPath = callExpression.node.arguments[0];
+                    const importPathPure = t.stringLiteral(importPath.value.replace(/^!/, ''));
+                    const importPathPureWithChunkName = t.stringLiteral(importPathPure.value);
+
+                    if (/^!/.test(importPath.value)) {
+                        importPathPureWithChunkName.leadingComments = [{
+                            type: 'CommentBlock',
+                            value: 'priority:low'
+                        }];
+                    }
 
                     loader.replaceWith(
                         t.objectExpression([
                             t.objectProperty(
                                 t.identifier('loader'),
-                                t.arrowFunctionExpression([], loader.node)
+                                t.arrowFunctionExpression(
+                                    [],
+                                    t.CallExpression(
+                                        t.identifier('import'),
+                                        [importPathPureWithChunkName]
+                                    )
+                                )
                             ),
                             t.objectProperty(
                                 t.identifier('webpack'),
@@ -47,7 +54,7 @@ module.exports.default = function(_ref) {
                                     t.arrayExpression(
                                         [t.callExpression(
                                             t.memberExpression(t.identifier('require'), t.identifier('resolveWeak')),
-                                            [importPath]
+                                            [importPathPure]
                                         )]
                                     )
                                 )
@@ -63,5 +70,3 @@ module.exports.default = function(_ref) {
         }
     };
 };
-
-module.exports.__esModule = true;

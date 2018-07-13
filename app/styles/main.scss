@@ -1,6 +1,6 @@
 @import 'normalize';
-@import 'font-awesome';
 @import 'bootstrap';
+@import 'fonts';
 @import 'header';
 @import 'menu';
 @import 'content';
@@ -9,8 +9,4 @@
 html, body {
     width: 100%;
     height: 100%;
-}
-
-body {
-    font-family: 'Open Sans', sans-serif;
 }

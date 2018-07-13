@@ -7,10 +7,20 @@ const webpack = require('webpack');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const PurifyCSSPlugin = require('purifycss-webpack');
-const { ReactLoadablePlugin } = require('react-loadable/webpack');
 
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const PurgeCSSPlugin = require('purgecss-webpack-plugin');
+const StyleExtHtmlWebpackPlugin = require('./.webpack/StyleExtHtmlWebpackPlugin');
+
+const { ReactLoadablePlugin } = require('react-loadable/webpack');
+const npm_package = require('./package.json');
+
+const moduleAliases = {};
+Object.keys(npm_package._moduleAliases).forEach(key => {
+    moduleAliases[key] = path.resolve(__dirname, npm_package._moduleAliases[key]);
+});
+
+const env = process.env.NODE_ENV || 'development';
 const commonConfig = {
     target: 'web',
     entry: {
@@ -37,10 +47,26 @@ const commonConfig = {
                 test: /\.s?css$/,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    "css-loader", {
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            minimize: env === 'production'
+                        }
+                    }, {
                         loader: "postcss-loader",
                         options: {
-                            fn: () => require('autoprefixer')
+                            config: {
+                                ctx: {
+                                    cssnano: {
+                                        preset: ['default', {
+                                            discardComments: {
+                                                removeAll: true
+                                            }
+                                        }]
+                                    },
+                                    autoprefixer: {}
+                                }
+                            }
                         }
                     }, "sass-loader"
                 ]
@@ -63,17 +89,41 @@ const commonConfig = {
                 loader: "file-loader"
             }
         ]
+    },
+    resolve: {
+        alias: moduleAliases
+    },
+    optimization: {
+        splitChunks: false
     }
 };
 
-const htmlWebpackPlugin = new HtmlWebpackPlugin({
-    filename: '../index.html',
-    template: path.join(__dirname, 'app/index.html')
-});
+const plugins1 = [
+    new HtmlWebpackPlugin({
+        filename: '../index.html',
+        template: path.join(__dirname, 'app/index.html'),
+        minify: env === 'production' ? {
+            collapseWhitespace: true,
+            useShortDoctype: true
+        } : false
+    }),
+    new ReactLoadablePlugin({
+        filename: './dist/assets/react-loadable.json',
+    })
+];
 
-const reactLoadablePlugin = new ReactLoadablePlugin({
-    filename: './dist/assets/react-loadable.json',
-});
+const plugins2 = [
+    new PurgeCSSPlugin({
+        paths: glob.sync([
+            path.join(__dirname, './app/*.html'),
+            path.join(__dirname, './app/**/*.js')
+        ], { nodir: true }),
+        whitelist: [],
+        whitelistPatterns: [],
+        whitelistPatternsChildren: []
+    }),
+    new StyleExtHtmlWebpackPlugin()
+];
 
 const developmentConfig = () => extend(true, {}, commonConfig, {
     mode: 'development',
@@ -83,18 +133,12 @@ const developmentConfig = () => extend(true, {}, commonConfig, {
         chunkFilename: 'js/[name].js'
     },
     plugins: [
-        htmlWebpackPlugin,
-        reactLoadablePlugin,
+       ...plugins1,
         new MiniCssExtractPlugin({
             filename: 'css/[name].css',
             chunkFilename: 'css/[name].css',
         }),
-        new PurifyCSSPlugin({
-            paths: glob.sync([
-                path.join(__dirname, './app/*.html'),
-                path.join(__dirname, './app/**/*.js')
-            ])
-        }),
+        ...plugins2,
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.DefinePlugin({
@@ -111,28 +155,16 @@ const productionConfig = () => extend(true, {}, commonConfig, {
         chunkFilename: 'js/[name]-[chunkhash:8].min.js'
     },
     plugins: [
-        htmlWebpackPlugin,
-        reactLoadablePlugin,
+        ...plugins1,
         new MiniCssExtractPlugin({
             filename: 'css/[name]-[hash:8].min.css',
             chunkFilename: 'css/[name]-[chunkhash:8].min.css',
         }),
-        new PurifyCSSPlugin({
-            paths: glob.sync([
-                path.join(__dirname, './app/*.html'),
-                path.join(__dirname, './app/**/*.js')
-            ]),
-            minimize: true
-        }),
+        ...plugins2,
         new UglifyJsPlugin(),
-        new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('production')
-        }),
-        new webpack.LoaderOptionsPlugin({
-            minimize: true
-        })
+        new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') }),
+        new webpack.LoaderOptionsPlugin({ minimize: true })
     ]
 });
 
-const env = process.env.NODE_ENV || 'development';
 module.exports = env == 'development' ? developmentConfig() : productionConfig();

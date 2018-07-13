@@ -3,39 +3,17 @@ const fs = require('fs');
 const path = require('path');
 
 const React = require('react');
+const { Helmet } = require('react-helmet');
 const Loadable = require('react-loadable');
 const { getBundles } = require('react-loadable/webpack');
-const stats = JSON.parse(fs.readFileSync(path.join(__dirname, '../../dist/assets/react-loadable.json'), 'utf8'));
 
 const { renderToString } = require('react-dom/server');
-const { configureStore } = require('../../app/store/configureStore');
+const { configureStore } = require('#app/store/configureStore');
 const Session = require('./Session');
-const App = require('../App');
+const App = require('#server/App');
 
-const metaInfo = {
-    title: {
-        name: 'id'
-    },
-    link: {
-        name: 'rel',
-        content: 'href'
-    },
-    meta: {
-        name: 'name',
-        content: 'content'
-    }
-};
-
-const generateMetaTags = metaData => (
-    Object.keys(metaData).map(key => {
-        const [tag, ...names] = key.split(':');
-        const name = names.join(':') || 'title';
-        const info = metaInfo[tag];
-        return (
-            `<${tag} ${info.name}="${name}" ${(info.content && `${info.content}="${metaData[key]}" />`) || `>${metaData[key]}</${tag}>`}`
-        );
-    }).join('')
-);
+const distFolderPath = '../../dist/';
+const stats = JSON.parse(fs.readFileSync(path.join(__dirname, distFolderPath, 'assets/react-loadable.json'), 'utf8'));
 
 module.exports = (req, res) => {
     const session = new Session();
@@ -64,14 +42,20 @@ module.exports = (req, res) => {
                 </Loadable.Capture>
             );
 
-            const metaTags = generateMetaTags(context.meta);
-            const bundles = getBundles(stats, context.modules);
+            const helmet = Helmet.renderStatic();
+            const metaTags = ['title', 'meta', 'link'].reduce((a, type) => a + helmet[type].toString(), '');
+            const customStyles = helmet.style.toString();
 
-            const styles = (
-                bundles.filter(bundle => bundle.file.endsWith('.css'))
-                    .map(style => `<link href="${style.publicPath}" rel="stylesheet" />`)
-                    .join('')
-            );
+            const bundles = getBundles(stats, context.modules.filter(m => !/^!/.test(m)));
+
+            let styles = '';
+            bundles.filter(bundle => bundle.file.endsWith('.css'))
+                .forEach(style => {
+                    styles += `
+                    <style data-href="${style.publicPath}">
+                        ${fs.readFileSync(path.join(__dirname, distFolderPath, 'assets/', style.file), 'utf-8')}
+                    </style>`;
+                });
 
             const scripts = (
                 bundles.filter(bundle => bundle.file.endsWith('.js'))
@@ -79,18 +63,22 @@ module.exports = (req, res) => {
                     .join('')
             );
 
-            fs.readFile(path.join(__dirname, '../../dist/index.html'), 'utf8', (err, data) => {
+            fs.readFile(path.join(__dirname, distFolderPath, 'index.html'), 'utf8', (err, data) => {
                 if (err) {
                     throw err;
                 }
 
+                res.set('Content-Type', 'text/html');
                 res.write(
                     data
-                        .replace('<!--META-TAGS-->', metaTags)
-                        .replace('<div id="root"></div>', `<div id="root">${html}</div>`)
+                        .replace('<html>', `<html ${helmet.htmlAttributes.toString()}>`)
+                        .replace('</head>', metaTags + '</head>')
                         .replace('</head>', styles + '</head>')
-                        .replace('</body>', scripts + '</body>')
+                        .replace('</head>', customStyles + '</head>')
+                        .replace('<body>', `<body ${helmet.bodyAttributes.toString()}>`)
+                        .replace('<div id="root"></div>', `<div id="root">${html}</div>`)
                         .replace('{STATE_NOT_LOADED:true}', JSON.stringify(new Buffer(JSON.stringify(store.getState())).toString('base64')))
+                        .replace('</body>', scripts + '</body>')
                 );
                 res.end();
             });

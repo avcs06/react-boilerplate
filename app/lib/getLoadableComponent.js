@@ -1,7 +1,7 @@
 
 import extend from 'extend';
 import Loadable from 'react-loadable';
-import Loader from '../components/Loader';
+import Loader from '$components/Loader';
 
 export default options => (
     Loadable(extend({

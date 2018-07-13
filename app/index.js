@@ -1,11 +1,10 @@
-import 'babel-polyfill';
 import React from 'react';
 import Loadable from 'react-loadable';
-import createHistory from 'history/createBrowserHistory';
+import createHistory from 'history/es/createBrowserHistory';
 
 import { hydrate } from 'react-dom';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router';
+import Provider from 'react-redux/lib/components/Provider';
+import Router from 'react-router/Router';
 
 import './styles/main.scss';
 import routes from './routes';

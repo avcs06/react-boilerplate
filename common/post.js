@@ -1,6 +1,6 @@
-import fetch from './fetch';
+const fetch = require('./fetch');
 
-export default (...args) => {
+module.exports = (...args) => {
     const url = args[0];
     let data = args[1];
     let successCallback = args[2] || Function.prototype;
