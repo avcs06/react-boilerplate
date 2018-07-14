@@ -18,8 +18,8 @@ class Home extends ImmutablePureComponent {
         return (
             <Fragment>
                 <Helmet>
-                    <title>Page Title</title>
-                    <meta name="description" content="Page Description" />
+                    <title>Home Page</title>
+                    <meta name="description" content="Home Page Description" />
                 </Helmet>
                 <div> Home Page (data: {sampleData.get('sample')}) </div>
             </Fragment>
