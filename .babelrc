@@ -5,6 +5,6 @@
         "react-app"
     ],
     "plugins": [
-        "./.babel/reactLoadableWebpack"
+        "./.babel/getLoadableToReactLoadable"
     ]
 }

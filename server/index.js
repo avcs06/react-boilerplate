@@ -1,7 +1,7 @@
 require('ignore-styles');
 require('module-alias/register');
 require('babel-register')({
-    plugins: ['#root/.babel/dynamicImportNode']
+    plugins: ['#root/.babel/prioritizeLoable']
 });
 
 const path = require('path');
