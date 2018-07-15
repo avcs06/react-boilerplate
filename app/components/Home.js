@@ -1,3 +1,5 @@
+// #loadable
+
 import '$styles/home.scss';
 import React, { Fragment } from 'react';
 import { Helmet } from 'react-helmet';

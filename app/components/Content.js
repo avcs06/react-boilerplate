@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import getLoadableComponent from '$lib/getLoadableComponent';
+import Home from './Home';
+import PageNotFound from './PageNotFound';
 
 const views = {
-    home: getLoadableComponent('./Home'),
-    pageNotFound: getLoadableComponent('./PageNotFound')
+    home: Home,
+    pageNotFound: PageNotFound
 };
 
 class Content extends Component {

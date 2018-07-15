@@ -1,30 +1,34 @@
 module.exports.__esModule = true;
 const syntax = require('babel-plugin-syntax-dynamic-import');
 
+let localVariableName;
 module.exports.default = function({ types: t }) {
     return {
         inherits: syntax,
         visitor: {
-            ImportDeclaration: function ImportDeclaration(path) {
-                const source = path.node.source.value;
-                if (!/getLoadableComponent/.test(source)) return;
+            Program: {
+                enter: function enter() {
+                    localVariableName = null;
+                }
+            },
+            ImportDeclaration: function ImportDeclaration(path, state) {
+                if (!/getLoadableComponent/.test(path.node.source.value)) return;
 
                 const defaultSpecifier = path.get('specifiers').find(specifier => specifier.isImportDefaultSpecifier());
-
                 if (!defaultSpecifier) return;
 
-                const bindingName = defaultSpecifier.node.local.name;
-                const binding = path.scope.getBinding(bindingName);
+                localVariableName = defaultSpecifier.node.local.name;
+            }, 
+            CallExpression: function CallExpression(path, state) {
+                if (!localVariableName || path.__processed) return;
 
-                binding.referencePaths.forEach(refPath => {
-                    const callExpression = refPath.parentPath;
-                    if (!callExpression.isCallExpression()) return;
-
-                    const args = callExpression.get('arguments');
-                    if (args.length !== 1) throw callExpression.error;
+                const { node } = path;
+                if (t.isIdentifier(node.callee, { name: localVariableName })) {
+                    const args = path.get('arguments');
+                    if (args.length !== 1) throw path.error;
 
                     const loader = args[0];
-                    const importPath = callExpression.node.arguments[0];
+                    const importPath = path.node.arguments[0];
                     const importPathPure = t.stringLiteral(importPath.value.replace(/^!/, ''));
                     const importPathPureWithChunkName = t.stringLiteral(importPathPure.value);
 
@@ -52,7 +56,7 @@ module.exports.default = function({ types: t }) {
                                 t.arrowFunctionExpression(
                                     [],
                                     t.arrayExpression(
-                                        [t.callExpression(
+                                        [t.CallExpression(
                                             t.memberExpression(t.identifier('require'), t.identifier('resolveWeak')),
                                             [importPathPure]
                                         )]
@@ -65,7 +69,9 @@ module.exports.default = function({ types: t }) {
                             )
                         ])
                     );
-                });
+
+                    path.__processed = true;
+                }
             }
         }
     };

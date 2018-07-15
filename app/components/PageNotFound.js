@@ -1,3 +1,5 @@
+// #loadable
+
 import React, { Fragment, Component } from 'react';
 import { Helmet } from 'react-helmet';
 

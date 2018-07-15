@@ -140,10 +140,7 @@ const developmentConfig = () => extend(true, {}, commonConfig, {
         }),
         ...plugins2,
         new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin(),
-        new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('development')
-        })
+        new webpack.NoEmitOnErrorsPlugin()
     ]
 });
 
@@ -161,9 +158,7 @@ const productionConfig = () => extend(true, {}, commonConfig, {
             chunkFilename: 'css/[name]-[chunkhash:8].min.css',
         }),
         ...plugins2,
-        new UglifyJsPlugin(),
-        new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') }),
-        new webpack.LoaderOptionsPlugin({ minimize: true })
+        new UglifyJsPlugin()
     ]
 });
 
