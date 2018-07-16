@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
+import getLoadableComponent from '$lib/getLoadableComponent';
 import Home from './Home';
-import PageNotFound from './PageNotFound';
 
 const views = {
     home: Home,
-    pageNotFound: PageNotFound
+    pageNotFound: getLoadableComponent('./PageNotFound', { timeout: 3000 })
 };
 
 class Content extends Component {

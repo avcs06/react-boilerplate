@@ -1,6 +1,6 @@
-module.exports.__esModule = true;
 const syntax = require('babel-plugin-syntax-dynamic-import');
 
+module.exports.__esModule = true;
 module.exports.default = function({ template, types: t }) {
     const buildImport = template('\n    Promise.resolve().then(() => require(SOURCE))\n  ');
 

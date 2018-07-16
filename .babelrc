@@ -5,7 +5,7 @@
         "react-app"
     ],
     "plugins": [
-        "./.babel/getLoadableToReactLoadable",
-        "./.babel/convertToLoadable"
+        "./.babel/handleLoadableClientPost",
+        "./.babel/handleLoadableClientPre"
     ]
 }

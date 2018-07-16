@@ -1,7 +1,7 @@
 require('ignore-styles');
 require('module-alias/register');
 require('babel-register')({
-    plugins: ['#root/.babel/prioritizeLoable']
+    plugins: ['#root/.babel/handleLoadableServer']
 });
 
 const path = require('path');

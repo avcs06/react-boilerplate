@@ -1,4 +1,3 @@
-module.exports.__esModule = true;
 const pathModule = require('path');
 const resolve = require('resolve');
 const { execSync } = require('child_process');
@@ -18,17 +17,19 @@ const getFirstLine = filepath => {
 let basedir;
 let hasLoadable;
 
+module.exports.__esModule = true;
 module.exports.default = function ({ types: t }) {
     return {
         visitor: {
             Program: {
                 enter: function enter(path, state) {
                     hasLoadable = false;
-                    hasInducedLoadable = false;
                     basedir = pathModule.dirname(state.file.opts.filename);
                 }
             },
             ImportDeclaration: function ImportDeclaration(path) {
+                if (path.node.__inserted) return;
+
                 let source = path.node.source.value;
                 if (/getLoadableComponent/.test(source)) {
                     if (!hasLoadable) {
@@ -63,12 +64,18 @@ module.exports.default = function ({ types: t }) {
 
                 if (!hasLoadable) {
                     hasLoadable = true;
-                    transforms.push(t.importDeclaration(
-                        [t.importDefaultSpecifier(t.identifier('getLoadableComponent'))],
-                        t.stringLiteral('$lib/getLoadableComponent')
-                    ));
+                    const getLoadableImport = (
+                        t.importDeclaration(
+                            [t.importDefaultSpecifier(t.identifier('getLoadableComponent'))],
+                            t.stringLiteral('$lib/getLoadableComponent')
+                        )
+                    );
+
+                    getLoadableImport.__inserted = true;
+                    transforms.push(getLoadableImport);
                 }
 
+                const prefix = parts[1] && parts[1] === 'low' ? '!' : '';
                 const defaultSpecifier = path.get('specifiers').find(specifier => specifier.isImportDefaultSpecifier());
                 transforms.push(
                     t.variableDeclaration("const", [
@@ -76,7 +83,7 @@ module.exports.default = function ({ types: t }) {
                             t.identifier(defaultSpecifier.node.local.name),
                             t.CallExpression(
                                 t.identifier('getLoadableComponent'),
-                                [t.stringLiteral(path.node.source.value)]
+                                [t.stringLiteral(prefix + path.node.source.value)]
                             )
                         )
                     ])

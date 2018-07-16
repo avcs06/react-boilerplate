@@ -1,7 +1,7 @@
-module.exports.__esModule = true;
 const syntax = require('babel-plugin-syntax-dynamic-import');
 
 let localVariableName;
+module.exports.__esModule = true;
 module.exports.default = function({ types: t }) {
     return {
         inherits: syntax,
@@ -20,12 +20,12 @@ module.exports.default = function({ types: t }) {
                 localVariableName = defaultSpecifier.node.local.name;
             }, 
             CallExpression: function CallExpression(path, state) {
-                if (!localVariableName || path.__processed) return;
+                if (!localVariableName) return;
 
                 const { node } = path;
                 if (t.isIdentifier(node.callee, { name: localVariableName })) {
                     const args = path.get('arguments');
-                    if (args.length !== 1) throw path.error;
+                    if (!args.length) throw path.error;
 
                     const loader = args[0];
                     const importPath = path.node.arguments[0];
@@ -69,8 +69,6 @@ module.exports.default = function({ types: t }) {
                             )
                         ])
                     );
-
-                    path.__processed = true;
                 }
             }
         }
