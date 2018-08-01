@@ -1,4 +1,4 @@
-// #loadable low
+// @loadable low
 
 import '$styles/home.scss';
 import React, { Fragment } from 'react';

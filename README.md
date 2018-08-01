@@ -70,4 +70,4 @@ In a page with heavy graphs or table or svg, you can render surrounding content 
 ### Loadable by Comment
 If you like clean code and you don't want to call _React Loadable_ or _getLoadableComponent_ everywhere, you can make a component Loadable by just adding a comment in the first line.
 
-If you write a comment with `#loadable` in the first line of a component, all import statements importing this component will be converted to React Loadable Components by babel plugin. You can add keyword `low` after a space if you do not want to render it on the server side.
+If you write a comment with `@loadable` in the first line of a component, all import statements importing this component will be converted to React Loadable Components by babel plugin. You can add keyword `low` after a space if you do not want to render it on the server side.

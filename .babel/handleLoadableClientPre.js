@@ -1,16 +1,14 @@
 const pathModule = require('path');
 const resolve = require('resolve');
-const { execSync } = require('child_process');
-const webpackConfig = require('../webpack.config');
 
 const extensions = ['.js'];
+const webpackConfig = require('../webpack.config');
 const moduleAliases = webpackConfig.resolve.alias;
 
 const cache = {};
+const readFirstLineSync = require('./readFirstLineSync');
 const getFirstLine = filepath => {
-    if (!cache[filepath]) {
-        cache[filepath] = execSync(`node ./.babel/getFirstLine.js --file '${filepath}'`).toString();
-    }
+    !cache[filepath] && (cache[filepath] = readFirstLineSync(filepath));
     return cache[filepath];
 };
 
@@ -59,7 +57,7 @@ module.exports.default = function ({ types: t }) {
 
                 const transforms = [];
                 const firstline = getFirstLine(filepath);
-                const parts = firstline.split('#').pop().trim().split(' ');
+                const parts = firstline.split('@').pop().trim().split(' ');
                 if (parts[0] !== 'loadable') return;
 
                 if (!hasLoadable) {
