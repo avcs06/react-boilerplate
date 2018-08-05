@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const Loadable = require('react-loadable');
 
-const SSR = require('./lib/SSR');
+const SSR = require('@lib/SSR');
 const apiHandlers = require('./handlers/api');
 
 const config = require('#config');

@@ -19,15 +19,13 @@ delete window.__PRELOADED_STATE__;
 const history = createHistory();
 const store = configureStore(preloadedState, history);
 
-window.onload = () => {
-    Loadable.preloadReady().then(() => (
-        hydrate(
-            <Provider store={store}>
-                <Router history={history}>
-                    {routes}
-                </Router>
-            </Provider>,
-            document.getElementById('root')
-        )
-    ));
-};
+Loadable.preloadReady().then(() => (
+    hydrate(
+        <Provider store={store}>
+            <Router history={history}>
+                {routes}
+            </Router>
+        </Provider>,
+        document.getElementById('root')
+    )
+));

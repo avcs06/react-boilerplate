@@ -5,8 +5,9 @@ const glob = require('glob-all');
 const extend = require('extend');
 const webpack = require('webpack');
 
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const PurgeCSSPlugin = require('purgecss-webpack-plugin');
@@ -106,6 +107,9 @@ const plugins1 = [
             collapseWhitespace: true,
             useShortDoctype: true
         } : false
+    }),
+    new ScriptExtHtmlWebpackPlugin({
+        defaultAttribute: 'async'
     }),
     new ReactLoadablePlugin({
         filename: './dist/assets/react-loadable.json',

@@ -8,7 +8,7 @@ module.exports = filepath => {
 
     while (++chars < 100) {
         fs.readSync(fd, buffer, 0, 1);
-        char = buffer.toString('utf8');
+        const char = buffer.toString('utf8');
         if (char === '\n' && (line = line.trim())) break;
         line += char;
     }

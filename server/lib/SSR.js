@@ -13,7 +13,7 @@ const Session = require('./Session');
 const App = require('#server/App');
 
 const distFolderPath = '../../dist/';
-const stats = JSON.parse(fs.readFileSync(path.join(__dirname, distFolderPath, 'assets/react-loadable.json'), 'utf8'));
+const stats = require('#dist/assets/react-loadable.json');
 
 module.exports = (req, res) => {
     const session = new Session();
