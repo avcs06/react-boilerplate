@@ -2,6 +2,12 @@
 
 A react boilerplate aiming to achieve best loading performance possible while also providing necessary tools needed for developing a website.
 
+Live Demo
+-
+My website [avcs.pro](https://avcs.pro) is built based on this Boilerplate.
+
+<img src='https://avcs.pro/static/performance.png' alt='AvcS Pro Performance' width="480" />
+
 Features
 -
 **So Meta**
